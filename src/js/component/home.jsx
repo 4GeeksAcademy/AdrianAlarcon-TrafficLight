@@ -1,47 +1,53 @@
 import React, { useState, useEffect } from "react";
 
-//include images into your bundle
-import rigoImage from "../../img/rigo-baby.jpg";
-
-//create your first component
 const Home = () => {
+  const [selectedLight, setSelectedLight] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const lights = ["red", "yellow", "green"];
+  const [lightIndex, setLightIndex] = useState(0);
 
-	const [selectedLight, setSelectedLight] = useState(null);
+  const handleLightClick = (light) => {
+    setSelectedLight(light === selectedLight ? null : light);
+  };
 
-	const handleLightClick = (light) => {
-		if (selectedLight === light) {
-			setSelectedLight(null);
-		}else{
-			setSelectedLight(light);
-		}
-	}
+  const handleButtonClick = () => {
+    setIsRunning(!isRunning);
+  };
 
-	const handleOutsideClick = () => {
-		setSelectedLight(null);
-	}
+  useEffect(() => {
+    let intervalId;
 
-	return (
-		<div className="midContainer" onClick={() => handleOutsideClick()}>
-			<div className="stick"></div>
-			<div className="trafficLight">
-				<div className={`red light ${selectedLight === "red" ? "selected" : ""}`}
-					onClick={(e) => {
-						e.stopPropagation();
-						handleLightClick("red");
-					}}></div>
-				<div className={`yellow light ${selectedLight === "yellow" ? "selected" : ""}`}
-					onClick={(e) => {
-						e.stopPropagation();
-						handleLightClick("yellow");
-					}}></div>
-				<div className={`green light ${selectedLight === "green" ? "selected" : ""}`}
-					onClick={(e) => {
-						e.stopPropagation();
-						handleLightClick("green");
-					}}></div>
-			</div>
-		</div>
-	);
+    if (isRunning) {
+      intervalId = setInterval(() => {
+        setLightIndex((prevIndex) => (prevIndex + 1) % lights.length);
+        setSelectedLight(lights[lightIndex]);
+      }, 1000);
+    } else {
+      clearInterval(intervalId);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isRunning, lightIndex]);
+
+  return (
+    <div className="midContainer">
+      <div className="stick"></div>
+      <div className="trafficLight">
+        {lights.map((light, index) => (
+          <div
+            key={index}
+            className={`light ${light} ${
+              selectedLight === light ? "selected" : ""
+            }`}
+            onClick={() => handleLightClick(light)}
+          ></div>
+        ))}
+      </div>
+      <button className="btn btn-secondary mt-4" onClick={handleButtonClick}>
+        {isRunning ? "Detener" : "Iniciar"}
+      </button>
+    </div>
+  );
 };
 
 export default Home;
