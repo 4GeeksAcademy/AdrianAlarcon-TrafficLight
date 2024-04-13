@@ -3,11 +3,13 @@ import React, { useState, useEffect } from "react";
 const Home = () => {
   const [selectedLight, setSelectedLight] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
-  const lights = ["red", "yellow", "green"];
-  const [lightIndex, setLightIndex] = useState(0);
 
   const handleLightClick = (light) => {
     setSelectedLight(light === selectedLight ? null : light);
+  };
+
+  const handleOutsideClick = () => {
+    setSelectedLight(null);
   };
 
   const handleButtonClick = () => {
@@ -19,29 +21,54 @@ const Home = () => {
 
     if (isRunning) {
       intervalId = setInterval(() => {
-        setLightIndex((prevIndex) => (prevIndex + 1) % lights.length);
-        setSelectedLight(lights[lightIndex]);
+        setSelectedLight((prevLight) => {
+          if (prevLight === "red") {
+            return "yellow";
+          } else if (prevLight === "yellow") {
+            return "green";
+          } else {
+            return "red";
+          }
+        });
       }, 1000);
     } else {
       clearInterval(intervalId);
     }
 
     return () => clearInterval(intervalId);
-  }, [isRunning, lightIndex]);
+  }, [isRunning]);
 
   return (
-    <div className="midContainer">
+    <div className="midContainer" onClick={handleOutsideClick}>
       <div className="stick"></div>
       <div className="trafficLight">
-        {lights.map((light, index) => (
-          <div
-            key={index}
-            className={`light ${light} ${
-              selectedLight === light ? "selected" : ""
-            }`}
-            onClick={() => handleLightClick(light)}
-          ></div>
-        ))}
+        <div
+          className={`red light ${
+            selectedLight === "red" ? "selected" : ""
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleLightClick("red");
+          }}
+        ></div>
+        <div
+          className={`yellow light ${
+            selectedLight === "yellow" ? "selected" : ""
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleLightClick("yellow");
+          }}
+        ></div>
+        <div
+          className={`green light ${
+            selectedLight === "green" ? "selected" : ""
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleLightClick("green");
+          }}
+        ></div>
       </div>
       <button className="btn btn-secondary mt-4" onClick={handleButtonClick}>
         {isRunning ? "Detener" : "Iniciar"}
